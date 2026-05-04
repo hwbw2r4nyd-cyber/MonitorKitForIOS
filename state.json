@@ -23,7 +23,7 @@
     },
     {
       "bundleId": "com.drwc.dreamy",
-      "monitoring": false,
+      "monitoring": true,
       "listingStatus": "not_listed",
       "trackName": null,
       "artworkUrl100": null,
