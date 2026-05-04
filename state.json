@@ -4,5 +4,22 @@
     "dataUpdatedAt": null,
     "lastScheduledRunAt": null
   },
-  "apps": []
+  "apps": [
+    {
+      "bundleId": "com.aime.Mellow",
+      "monitoring": true,
+      "listingStatus": "not_listed",
+      "trackName": null,
+      "artworkUrl100": null,
+      "storeVersion": null,
+      "version": null,
+      "currentVersionReleaseDate": null,
+      "lastKnownVersion": null,
+      "versionChangeCount": 0,
+      "lastCheckedAt": null,
+      "lastVersionChangeAt": null,
+      "lastStaleNotifyAt": null,
+      "history": []
+    }
+  ]
 }
