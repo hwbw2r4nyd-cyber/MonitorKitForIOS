@@ -296,7 +296,7 @@
       cc.className = "chip";
       cc.textContent = `${tr("changeCount")}: ${app.versionChangeCount ?? 0}`;
 
-      chips.append(st, v, vdEl, cc);
+      chips.append(v, vdEl, cc);
 
       body.append(title, bundle, chips);
 
