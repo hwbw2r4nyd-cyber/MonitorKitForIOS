@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "meta": {
-    "dataUpdatedAt": "2026-05-04T08:49:34Z",
+    "dataUpdatedAt": "2026-05-04T08:49:35Z",
     "lastScheduledRunAt": null
   },
   "apps": [
@@ -16,7 +16,7 @@
       "currentVersionReleaseDate": "2026-04-30T13:04:10Z",
       "lastKnownVersion": null,
       "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-04T08:49:33Z",
+      "lastCheckedAt": "2026-05-04T08:49:35Z",
       "lastVersionChangeAt": null,
       "lastStaleNotifyAt": null,
       "history": []
@@ -32,7 +32,7 @@
       "currentVersionReleaseDate": "2026-04-27T09:32:15Z",
       "lastKnownVersion": "44.9.0",
       "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-04T08:49:33Z",
+      "lastCheckedAt": "2026-05-04T08:49:35Z",
       "lastVersionChangeAt": "2026-05-04T08:13:26Z",
       "lastStaleNotifyAt": null,
       "history": []
@@ -48,7 +48,7 @@
       "currentVersionReleaseDate": null,
       "lastKnownVersion": null,
       "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-04T08:49:34Z",
+      "lastCheckedAt": "2026-05-04T08:49:35Z",
       "lastVersionChangeAt": null,
       "lastStaleNotifyAt": null,
       "history": []
