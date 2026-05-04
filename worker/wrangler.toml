@@ -11,4 +11,4 @@ GITHUB_OWNER = "hwbw2r4nyd-cyber"
 GITHUB_REPO = "MonitorKitForIOS"
 GITHUB_BRANCH = "main"
 # 允许的前端来源，例如 https://YOUR_USER.github.io
-ALLOWED_ORIGIN = "origin"
+ALLOWED_ORIGIN = "*"
