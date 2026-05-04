@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>App Store Monitor</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <!--
+      可选：部署前填入 Worker 地址与默认语言（不写则仅在设置里保存 localStorage）。
+      <script>
+        window.APP_CONFIG = {
+          apiBase: "https://app-store-monitor-api.your-subdomain.workers.dev",
+          defaultLocale: "en"
+        };
+      </script>
+    -->
+  </head>
+  <body>
+    <header>
+      <h1 id="page-title">App Store Monitor</h1>
+      <div class="toolbar">
+        <button type="button" class="btn" id="nav-list">Apps</button>
+        <button type="button" class="btn" id="nav-settings">Settings</button>
+        <button type="button" class="btn primary" id="btn-refresh">Refresh</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button type="button" class="tab active" id="tab-all">All</button>
+      <button type="button" class="tab" id="tab-listed">Listed</button>
+      <button type="button" class="tab" id="tab-not">Not listed</button>
+    </div>
+
+    <main>
+      <section id="view-list">
+        <div class="meta-bar" id="meta-updated"></div>
+
+        <div class="panel">
+          <div class="form-grid" style="grid-template-columns: 1fr auto">
+            <div>
+              <label for="input-bundle"><span id="label-add">Add app</span></label>
+              <input type="text" id="input-bundle" autocomplete="off" />
+            </div>
+            <div style="align-self: end">
+              <button type="button" class="btn primary" id="btn-add">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="card-list" class="card-list"></div>
+      </section>
+
+      <section id="view-settings" class="hidden">
+        <div class="panel" id="settings-panel">
+          <h3 id="settings-conn-title">API connection</h3>
+          <div class="form-grid">
+            <div>
+              <label for="input-api-base"><span id="lbl-api-base">Worker base URL</span></label>
+              <input type="text" id="input-api-base" autocomplete="off" placeholder="https://....workers.dev" />
+            </div>
+            <div>
+              <label for="input-api-secret"><span id="lbl-api-secret">Worker API secret</span></label>
+              <input type="password" id="input-api-secret" autocomplete="off" />
+            </div>
+            <p id="api-hint" style="margin: 0; font-size: 0.85rem; color: var(--muted)"></p>
+          </div>
+
+          <h3 id="settings-sched-title" style="margin-top: 1.25rem">Schedule</h3>
+          <p id="tz-note" style="margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--muted)"></p>
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr">
+            <div>
+              <label for="input-start"><span id="lbl-start">Window start</span></label>
+              <input type="time" id="input-start" step="60" />
+            </div>
+            <div>
+              <label for="input-end"><span id="lbl-end">Window end</span></label>
+              <input type="time" id="input-end" step="60" />
+            </div>
+            <div>
+              <label for="input-interval"><span id="lbl-interval">Interval (minutes)</span></label>
+              <input type="number" id="input-interval" min="1" step="1" />
+            </div>
+          </div>
+
+          <h3 id="settings-locale-title" style="margin-top: 1.25rem">Language</h3>
+          <div class="form-grid">
+            <label class="switch">
+              <input type="radio" name="locale" id="locale-en" value="en" checked />
+              <span id="lbl-locale-en">English</span>
+            </label>
+            <label class="switch">
+              <input type="radio" name="locale" id="locale-zh" value="zh" />
+              <span id="lbl-locale-zh">中文</span>
+            </label>
+            <p style="margin: 0; font-size: 0.85rem; color: var(--muted)">
+              config.json defaultLocale:
+              <strong id="config-default-locale">—</strong>
+            </p>
+          </div>
+
+          <button type="button" class="btn primary" id="btn-save-settings" style="margin-top: 1rem">
+            Save settings
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

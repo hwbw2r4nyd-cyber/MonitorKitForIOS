@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.web/
+.wrangler/
+node_modules/
+dist/

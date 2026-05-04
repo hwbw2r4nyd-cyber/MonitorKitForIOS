@@ -1,0 +1,14 @@
+name = "app-store-monitor-api"
+main = "src/index.js"
+compatibility_date = "2024-10-01"
+
+# 使用 wrangler secret put 配置敏感项：
+#   GITHUB_TOKEN — Fine-grained PAT，Contents 读写目标仓库
+#   WORKER_API_SECRET — 前端请求 Authorization: Bearer <值>
+
+[vars]
+GITHUB_OWNER = "hwbw2r4nyd-cyber"
+GITHUB_REPO = "MonitorKitForIOS"
+GITHUB_BRANCH = "main"
+# 允许的前端来源，例如 https://YOUR_USER.github.io
+ALLOWED_ORIGIN = "origin"

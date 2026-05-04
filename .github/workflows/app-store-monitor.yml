@@ -1,0 +1,45 @@
+name: App Store monitor check
+
+on:
+  schedule:
+    # 高于常见 intervalMinutes；脚本内再按窗口与间隔节流
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: app-store-monitor-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run monitor script
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+        run: python scripts/check.py
+
+      - name: Commit and push state.json if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          if git diff --staged --quiet; then
+            echo "No changes to state.json"
+          else
+            git commit -m "chore: update App Store monitor state"
+            git push
+          fi

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "timezone": "Asia/Shanghai",
+  "window": {
+    "start": "09:00",
+    "end": "19:00"
+  },
+  "intervalMinutes": 60,
+  "defaultLocale": "en"
+}

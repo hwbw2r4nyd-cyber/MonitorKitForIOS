@@ -1,0 +1,202 @@
+/**
+ * Cloudflare Worker：代理读写 GitHub 仓库中的 config.json / state.json 并提交。
+ * 环境变量：GITHUB_TOKEN、GITHUB_OWNER、GITHUB_REPO、GITHUB_BRANCH、WORKER_API_SECRET、ALLOWED_ORIGIN
+ */
+
+const STATE_PATH = "state.json";
+const CONFIG_PATH = "config.json";
+
+function corsHeaders(env, req) {
+  const origin = env.ALLOWED_ORIGIN === "*" ? "*" : env.ALLOWED_ORIGIN || "*";
+  const h = {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+  };
+  if (origin !== "*" && req.headers.get("Origin")) {
+    h["Access-Control-Allow-Origin"] = req.headers.get("Origin");
+  }
+  return h;
+}
+
+async function githubFetch(env, path, init = {}) {
+  const url = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/${path}?ref=${encodeURIComponent(env.GITHUB_BRANCH)}`;
+  const headers = {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    "User-Agent": "app-store-monitor-worker",
+    ...init.headers,
+  };
+  return fetch(url, { ...init, headers });
+}
+
+async function getRepoFile(env, path) {
+  const res = await githubFetch(env, path);
+  if (res.status === 404) return { missing: true };
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`GitHub GET ${path}: ${res.status} ${t}`);
+  }
+  const data = await res.json();
+  const b64 = data.content.replace(/\n/g, "");
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const text = new TextDecoder("utf-8").decode(bytes);
+  return { sha: data.sha, json: JSON.parse(text) };
+}
+
+async function putRepoFile(env, path, obj, message, sha) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2) + "\n")));
+  const body = {
+    message,
+    content,
+    branch: env.GITHUB_BRANCH,
+  };
+  if (sha) body.sha = sha;
+  const res = await githubFetch(env, path, {
+    method: "PUT",
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`GitHub PUT ${path}: ${res.status} ${t}`);
+  }
+  return res.json();
+}
+
+function requireAuth(req, env) {
+  const secret = env.WORKER_API_SECRET;
+  if (!secret) return false;
+  const h = req.headers.get("Authorization") || "";
+  const m = h.match(/^Bearer\s+(.+)$/i);
+  return m && m[1] === secret;
+}
+
+function json(data, status = 200, extra = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json; charset=utf-8", ...extra },
+  });
+}
+
+function newAppShell(bundleId) {
+  return {
+    bundleId,
+    monitoring: true,
+    listingStatus: "not_listed",
+    trackName: null,
+    artworkUrl100: null,
+    storeVersion: null,
+    version: null,
+    currentVersionReleaseDate: null,
+    lastKnownVersion: null,
+    versionChangeCount: 0,
+    lastCheckedAt: null,
+    lastVersionChangeAt: null,
+    lastStaleNotifyAt: null,
+    history: [],
+  };
+}
+
+export default {
+  async fetch(req, env) {
+    const c = corsHeaders(env, req);
+    if (req.method === "OPTIONS") {
+      return new Response(null, { headers: c });
+    }
+
+    const url = new URL(req.url);
+    const path = url.pathname.replace(/\/$/, "") || "/";
+
+    try {
+      if (path === "/state" && req.method === "GET") {
+        const r = await getRepoFile(env, STATE_PATH);
+        if (r.missing) return json({ error: "state.json not found" }, 404, c);
+        return json(r.json, 200, c);
+      }
+
+      if (path === "/config" && req.method === "GET") {
+        const r = await getRepoFile(env, CONFIG_PATH);
+        if (r.missing) return json({ error: "config.json not found" }, 404, c);
+        return json(r.json, 200, c);
+      }
+
+      if (path === "/api/v1" && req.method === "POST") {
+        if (!requireAuth(req, env)) {
+          return json({ error: "Unauthorized" }, 401, c);
+        }
+        let body;
+        try {
+          body = await req.json();
+        } catch {
+          return json({ error: "Invalid JSON" }, 400, c);
+        }
+        const action = body.action;
+
+        if (action === "saveConfig") {
+          const cfg = body.config;
+          if (!cfg || typeof cfg !== "object") return json({ error: "config required" }, 400, c);
+          const cur = await getRepoFile(env, CONFIG_PATH);
+          await putRepoFile(
+            env,
+            CONFIG_PATH,
+            cfg,
+            "chore: update monitor config via Worker",
+            cur.missing ? undefined : cur.sha
+          );
+          return json({ ok: true }, 200, c);
+        }
+
+        if (action === "setMonitoring") {
+          const bundleId = body.bundleId;
+          if (!bundleId) return json({ error: "bundleId required" }, 400, c);
+          const cur = await getRepoFile(env, STATE_PATH);
+          if (cur.missing) return json({ error: "state missing" }, 404, c);
+          const state = cur.json;
+          const app = state.apps?.find((a) => a.bundleId === bundleId);
+          if (!app) return json({ error: "app not found" }, 404, c);
+          app.monitoring = !!body.monitoring;
+          await putRepoFile(env, STATE_PATH, state, `chore: toggle monitoring ${bundleId}`, cur.sha);
+          return json({ ok: true }, 200, c);
+        }
+
+        if (action === "addApp") {
+          const bundleId = (body.bundleId || "").trim();
+          if (!bundleId) return json({ error: "bundleId required" }, 400, c);
+          const cur = await getRepoFile(env, STATE_PATH);
+          if (cur.missing) return json({ error: "state missing" }, 404, c);
+          const state = cur.json;
+          state.apps = state.apps || [];
+          if (state.apps.some((a) => a.bundleId === bundleId)) {
+            return json({ error: "bundleId already exists" }, 409, c);
+          }
+          state.apps.push(newAppShell(bundleId));
+          await putRepoFile(env, STATE_PATH, state, `chore: add app ${bundleId}`, cur.sha);
+          return json({ ok: true }, 200, c);
+        }
+
+        if (action === "deleteApp") {
+          const bundleId = body.bundleId;
+          if (!bundleId) return json({ error: "bundleId required" }, 400, c);
+          const cur = await getRepoFile(env, STATE_PATH);
+          if (cur.missing) return json({ error: "state missing" }, 404, c);
+          const state = cur.json;
+          const before = state.apps?.length || 0;
+          state.apps = (state.apps || []).filter((a) => a.bundleId !== bundleId);
+          if (state.apps.length === before) return json({ error: "app not found" }, 404, c);
+          await putRepoFile(env, STATE_PATH, state, `chore: remove app ${bundleId}`, cur.sha);
+          return json({ ok: true }, 200, c);
+        }
+
+        return json({ error: "unknown action" }, 400, c);
+      }
+
+      return json({ error: "Not found" }, 404, c);
+    } catch (e) {
+      return json({ error: String(e.message || e) }, 500, c);
+    }
+  },
+};
