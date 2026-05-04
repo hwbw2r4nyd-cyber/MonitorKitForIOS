@@ -6,5 +6,6 @@
     "end": "19:00"
   },
   "intervalMinutes": 60,
-  "defaultLocale": "zh"
+  "defaultLocale": "zh",
+  "notifyEmail": ""
 }
