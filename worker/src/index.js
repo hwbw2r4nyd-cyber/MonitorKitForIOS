@@ -112,6 +112,66 @@ export default {
     const path = url.pathname.replace(/\/$/, "") || "/";
 
     try {
+      // ---- 诊断端点 ----
+      if (path === "/debug" && req.method === "GET") {
+        const owner = env.GITHUB_OWNER || "(not set)";
+        const repo = env.GITHUB_REPO || "(not set)";
+        const branch = env.GITHUB_BRANCH || "(not set)";
+        const tokenSet = env.GITHUB_TOKEN ? "yes (length: " + env.GITHUB_TOKEN.length + ")" : "no";
+        const secretSet = env.WORKER_API_SECRET ? "yes" : "no";
+        const allowedOrigin = env.ALLOWED_ORIGIN || "(not set)";
+
+        let gitHubStatus = "unknown";
+        if (env.GITHUB_TOKEN && owner !== "(not set)" && repo !== "(not set)") {
+          try {
+            const testUrl = `https://api.github.com/repos/${owner}/${repo}`;
+            const testRes = await fetch(testUrl, {
+              headers: {
+                Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+                "User-Agent": "app-store-monitor-worker",
+              },
+            });
+            if (testRes.ok) gitHubStatus = "ok (repo accessible)";
+            else if (testRes.status === 401) gitHubStatus = "401 Unauthorized - token invalid";
+            else if (testRes.status === 403) gitHubStatus = "403 Forbidden - check token permissions";
+            else if (testRes.status === 404) gitHubStatus = "404 Not Found - wrong owner/repo?";
+            else gitHubStatus = `${testRes.status} ${testRes.statusText}`;
+          } catch (e) {
+            gitHubStatus = "fetch error: " + e.message;
+          }
+        }
+
+        let stateExists = "unknown";
+        let configExists = "unknown";
+        if (owner !== "(not set)" && repo !== "(not set)" && env.GITHUB_TOKEN) {
+          try {
+            const sRes = await githubFetch(env, STATE_PATH);
+            stateExists = sRes.ok ? "yes" : sRes.status === 404 ? "no (404)" : `error (${sRes.status})`;
+          } catch (e) { stateExists = "error: " + e.message; }
+          try {
+            const cRes = await githubFetch(env, CONFIG_PATH);
+            configExists = cRes.ok ? "yes" : cRes.status === 404 ? "no (404)" : `error (${cRes.status})`;
+          } catch (e) { configExists = "error: " + e.message; }
+        }
+
+        return json({
+          env: {
+            GITHUB_OWNER: owner,
+            GITHUB_REPO: repo,
+            GITHUB_BRANCH: branch,
+            GITHUB_TOKEN: tokenSet,
+            WORKER_API_SECRET: secretSet,
+            ALLOWED_ORIGIN: allowedOrigin,
+          },
+          diagnostics: {
+            gitHubStatus,
+            stateJsonExists: stateExists,
+            configJsonExists: configExists,
+          },
+        }, 200, c);
+      }
+      // ---- 诊断端点结束 ----
+
       if (path === "/state" && req.method === "GET") {
         const r = await getRepoFile(env, STATE_PATH);
         if (r.missing) return json({ error: "state.json not found" }, 404, c);
