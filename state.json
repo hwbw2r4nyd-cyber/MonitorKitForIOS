@@ -20,22 +20,6 @@
       "lastVersionChangeAt": null,
       "lastStaleNotifyAt": null,
       "history": []
-    },
-    {
-      "bundleId": "com.drwc.dreamy",
-      "monitoring": true,
-      "listingStatus": "not_listed",
-      "trackName": null,
-      "artworkUrl100": null,
-      "storeVersion": null,
-      "version": null,
-      "currentVersionReleaseDate": null,
-      "lastKnownVersion": null,
-      "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-04T13:45:08Z",
-      "lastVersionChangeAt": null,
-      "lastStaleNotifyAt": null,
-      "history": []
     }
   ]
 }
