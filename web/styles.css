@@ -375,23 +375,15 @@ input:focus {
   color: var(--text-secondary);
 }
 
-.status-listed {
-  color: var(--ok);
-  background: var(--ok-light);
-  border-color: color-mix(in srgb, var(--ok) 25%, transparent);
-}
-
-.status-not {
-  color: var(--danger);
-  background: var(--danger-light);
-  border-color: color-mix(in srgb, var(--danger) 25%, transparent);
-}
-
 .card-actions {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   align-items: stretch;
+}
+
+.card-actions .btn {
+  justify-content: center;
 }
 
 /* ── Toggle switch ──────────────────────────── */
