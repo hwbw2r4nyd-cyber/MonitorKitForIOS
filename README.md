@@ -13,7 +13,8 @@
 | `config.json` | 时区、监听窗口、间隔、默认语言等 |
 | `state.json` | 应用列表、商店缓存、版本流水、`meta` |
 | `scripts/check.py` | 检查脚本（仅标准库） |
-| `.github/workflows/app-store-monitor.yml` | 定时 Workflow |
+| `.github/workflows/app-store-monitor.yml` | 定时检查 Workflow |
+| `.github/workflows/deploy-pages.yml` | 将 `web/` 部署到 GitHub Pages |
 | `web/` | Pages 静态前端 |
 | `worker/` | Cloudflare Worker + `wrangler.toml` |
 
@@ -76,11 +77,52 @@ GitHub Secrets：
 
 ---
 
-## GitHub Pages
+## GitHub Pages（两点说明）
 
-1. **Settings → Pages**：Source 选部署分支（如 `main`），文件夹选 **`/web`**（或把整个站点根指向 `web/` 内容，依 GitHub 选项而定）。
-2. 前端需在 **设置页** 填写 **Worker 根 URL** 与 **API 密钥**（与 Worker 的 `WORKER_API_SECRET` 一致），保存在浏览器 **localStorage**。
-3. 可选：在 `web/index.html` 中取消注释并填写 `window.APP_CONFIG.apiBase` / `defaultLocale`，便于首次打开即有默认 API 地址或语言。
+### 为什么界面里找不到「文件夹 /web」？
+
+从 **分支** 部署 Pages 时，GitHub **只允许** 网站根目录为仓库的 **`/`（根）** 或 **`/docs`**，**没有**「`/web`」这个选项。要让源码继续放在 `web/` 又不挪文件夹，请用本仓库自带的 **GitHub Actions 部署**：
+
+#### A. 推荐：用 Actions 发布 `web/`（与本仓库一致）
+
+1. 打开 GitHub 仓库 → **Settings（设置）** → 左侧 **Pages**。
+2. **Build and deployment（构建与部署）** 里，**Source（来源）** 选 **GitHub Actions**（不要选 “Deploy from a branch”）。
+3. 把包含 `.github/workflows/deploy-pages.yml` 的提交推到 **`main`**；或在 **Actions** 里手动运行一次 **Deploy Pages (web/)**。
+4. 等该 Workflow 绿勾完成后，回到 **Settings → Pages**，页面顶部会显示站点地址，一般为：
+   - 用户站：`https://<你的用户名>.github.io/<仓库名>/`
+   - 具体以 Pages 里显示的 **Visit site** 为准。
+
+之后只要你改 `web/` 下的文件并 push 到 `main`，会自动重新部署（也可在 Actions 里手动 **Run workflow**）。
+
+#### B. 备选：不用 Actions，只用分支部署
+
+把 `web/` 里的文件**复制或移动**到仓库的 **`docs/`** 目录（GitHub 只认这个名字），然后在 **Settings → Pages** 里选：**Branch `main` + Folder `/docs`**。
+
+---
+
+### 浏览器里「Worker URL + API 密钥」怎么填？（第三点）
+
+前提：你已经用 `wrangler deploy` 部署过 Worker，并已执行：
+
+```bash
+npx wrangler secret put WORKER_API_SECRET
+```
+
+这里录入的 **WORKER_API_SECRET** 建议自行生成一串足够长的随机字符（和密码一样保管）。
+
+操作步骤：
+
+1. 用浏览器打开 **GitHub Pages 给你的站点地址**（见上一节）。
+2. 点击顶部 **Settings（设置）**。
+3. **Worker 根 URL**：填 Worker 的公网地址，**不要**末尾斜杠。  
+   - 部署成功后终端里会看到类似：`https://app-store-monitor-api.<子域>.workers.dev`  
+   - 若你有自定义域名，则填自定义域名，例如 `https://monitor-api.example.com`
+4. **Worker API 密钥**：填 **与 Cloudflare 里 `WORKER_API_SECRET` 完全相同的字符串**（不是 GitHub Token）。
+5. 点 **Save settings（保存设置）**：会把这两项存进浏览器 **本地（localStorage）**，并尝试从 Worker 拉取/写回 `config.json`。  
+   - 若 CORS 报错：把 Worker 环境变量 **`ALLOWED_ORIGIN`** 改成你的 Pages 完整 origin（例如 `https://wendeqiang.github.io`），或与仓库子路径一致时使用 **`https://<用户>.github.io/<仓库名>`**（需与实际打开地址一致），重新部署 Worker。
+6. 回到 **Apps** 视图，点 **Refresh（刷新）** 加载列表。
+
+可选：在 `web/index.html` 里取消注释 `window.APP_CONFIG`，预先写好 `apiBase` / `defaultLocale`，减少第一次在设置里粘贴 URL 的步骤。
 
 ---
 
