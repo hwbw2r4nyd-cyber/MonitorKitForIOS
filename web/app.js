@@ -47,6 +47,13 @@
       none: "—",
       needApiBase: "Set Worker base URL in Settings to load data.",
       confirmDelete: "Remove this app from the monitor list?",
+      notifyTitle: "Email Notifications",
+      notifyEmail: "Notification email",
+      notifyHint: "Resend API key and sender set in Worker env variables.",
+      testEmail: "Send test email",
+      testEmailSending: "Sending...",
+      testEmailOk: "Test email sent!",
+      testEmailFail: "Failed to send test email",
     },
     zh: {
       title: "App Store 监控面板",
@@ -91,6 +98,13 @@
       none: "—",
       needApiBase: "请先在设置中填写 Worker 根 URL 以加载数据。",
       confirmDelete: "从监听列表中移除该应用？",
+      notifyTitle: "邮件通知",
+      notifyEmail: "通知邮箱",
+      notifyHint: "Resend API 密钥和发件人在 Worker 环境变量中设置。",
+      testEmail: "发送测试邮件",
+      testEmailSending: "发送中...",
+      testEmailOk: "测试邮件已发送！",
+      testEmailFail: "测试邮件发送失败",
     },
   };
 
@@ -221,6 +235,10 @@
     el("lbl-locale-en").textContent = tr("localeEn");
     el("lbl-locale-zh").textContent = tr("localeZh");
     el("btn-save-settings").textContent = tr("saveSettings");
+    el("settings-notify-title").textContent = tr("notifyTitle");
+    el("lbl-notify-email").textContent = tr("notifyEmail");
+    el("notify-hint").textContent = tr("notifyHint");
+    el("btn-test-email").textContent = tr("testEmail");
     el("locale-en").checked = locale === "en";
     el("locale-zh").checked = locale === "zh";
     renderList();
@@ -448,6 +466,8 @@
           ? "en"
           : "—";
     el("config-default-locale").textContent = dl;
+    el("input-notify-email").value = (config && config.notifyEmail) || "";
+    el("test-email-status").textContent = "";
     applyLocaleUi();
   }
 
@@ -513,6 +533,7 @@
         cfg.defaultLocale = locale === "zh" ? "zh" : "en";
         cfg.timezone = cfg.timezone || "Asia/Shanghai";
         cfg.schemaVersion = cfg.schemaVersion ?? 1;
+        cfg.notifyEmail = el("input-notify-email").value.trim();
         await apiPost({ action: "saveConfig", config: cfg });
         toast(tr("saved"));
         applyLocaleUi();
@@ -535,6 +556,44 @@
         locale = "zh";
         localStorage.setItem(LS_LOCALE, locale);
         applyLocaleUi();
+      }
+    });
+
+    el("btn-test-email").addEventListener("click", async () => {
+      const email = el("input-notify-email").value.trim();
+      if (!email) {
+        toast("Please enter an email first", true);
+        return;
+      }
+      el("btn-test-email").disabled = true;
+      el("btn-test-email").textContent = tr("testEmailSending");
+      el("test-email-status").textContent = "";
+      try {
+        const r = await fetch(`${apiBase()}/api/v1`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: apiSecret() ? `Bearer ${apiSecret()}` : "",
+          },
+          body: JSON.stringify({ action: "testEmail", email }),
+        });
+        const data = await r.json();
+        if (data.ok) {
+          el("test-email-status").textContent = tr("testEmailOk");
+          el("test-email-status").style.color = "var(--ok)";
+          toast(tr("testEmailOk"));
+        } else {
+          el("test-email-status").textContent = data.error || tr("testEmailFail");
+          el("test-email-status").style.color = "var(--danger)";
+          toast(data.error || tr("testEmailFail"), true);
+        }
+      } catch (e) {
+        el("test-email-status").textContent = tr("testEmailFail");
+        el("test-email-status").style.color = "var(--danger)";
+        toast(e.message || tr("testEmailFail"), true);
+      } finally {
+        el("btn-test-email").disabled = false;
+        el("btn-test-email").textContent = tr("testEmail");
       }
     });
 

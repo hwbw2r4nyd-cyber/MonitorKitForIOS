@@ -116,10 +116,11 @@ def pick_artwork(track: dict) -> str | None:
     return None
 
 
-def send_resend(html: str, subject: str) -> None:
+def send_resend(html: str, subject: str, cfg: dict | None = None) -> None:
     api_key = os.environ.get("RESEND_API_KEY")
     from_addr = os.environ.get("RESEND_FROM")
-    to_addr = os.environ.get("NOTIFY_EMAIL")
+    # 优先从 config.json 读取通知邮箱，否则回退环境变量
+    to_addr = (cfg or {}).get("notifyEmail") or os.environ.get("NOTIFY_EMAIL")
     if not api_key or not from_addr or not to_addr:
         return
     payload = json.dumps(
@@ -222,7 +223,7 @@ def main() -> int:
                 f"<p>新版本：<strong>{store_version}</strong></p>"
                 f"<p>记录时间（UTC）：{format_iso(utc_now)}</p>"
             )
-            send_resend(html, subject)
+            send_resend(html, subject, cfg)
             continue
 
         # 版本未变：长期无变动提醒
@@ -248,7 +249,7 @@ def main() -> int:
                     f"<p>当前商店版本仍为：<strong>{store_version}</strong></p>"
                     f"<p>自上次版本变动记录起已满 {STALE_NATURAL_DAYS} 个自然日（{tz_name}）。</p>"
                 )
-                send_resend(html, subject)
+                send_resend(html, subject, cfg)
                 app["lastStaleNotifyAt"] = format_iso(utc_now)
 
     meta["lastScheduledRunAt"] = format_iso(utc_now)

@@ -357,6 +357,40 @@ export default {
           return json({ ok: true }, 200, c);
         }
 
+        if (action === "testEmail") {
+          const email = (body.email || "").trim();
+          if (!email) return json({ error: "email required" }, 400, c);
+          // 用 Resend API 发送测试邮件
+          const resendKey = env.RESEND_API_KEY;
+          const fromAddr = env.RESEND_FROM;
+          if (!resendKey || !fromAddr) {
+            return json({ error: "Resend API key or sender not configured in Worker env" }, 400, c);
+          }
+          try {
+            const payload = JSON.stringify({
+              from: fromAddr,
+              to: [email],
+              subject: "App Store Monitor — Test Email",
+              html: `<p>This is a test email from <strong>App Store Monitor</strong>.</p><p>If you received this, email delivery is working correctly.</p>`,
+            });
+            const r = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${resendKey}`,
+                "Content-Type": "application/json",
+              },
+              body: payload,
+            });
+            if (!r.ok) {
+              const errText = await r.text();
+              return json({ error: `Resend API error: ${r.status} ${errText}` }, 500, c);
+            }
+            return json({ ok: true }, 200, c);
+          } catch (e) {
+            return json({ error: String(e.message || e) }, 500, c);
+          }
+        }
+
         return json({ error: "unknown action" }, 400, c);
       }
 
