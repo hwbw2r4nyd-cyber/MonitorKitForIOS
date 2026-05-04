@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
   "meta": {
-    "dataUpdatedAt": null,
+    "dataUpdatedAt": "2026-05-04T08:12:29Z",
     "lastScheduledRunAt": null
   },
   "apps": [
     {
       "bundleId": "com.aime.Mellow",
       "monitoring": true,
-      "listingStatus": "not_listed",
-      "trackName": null,
-      "artworkUrl100": null,
-      "storeVersion": null,
-      "version": null,
-      "currentVersionReleaseDate": null,
+      "listingStatus": "listed",
+      "trackName": "AI Mellow",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/cf/01/3c/cf013cd8-fc3a-549b-465d-0ac743dfb0a9/AppIcon-1x_U007ephone-0-11-0-85-220-0.png/512x512bb.jpg",
+      "storeVersion": "1.0.0",
+      "version": "1.0.0",
+      "currentVersionReleaseDate": "2026-04-30T13:04:10Z",
       "lastKnownVersion": null,
       "versionChangeCount": 0,
-      "lastCheckedAt": null,
+      "lastCheckedAt": "2026-05-04T08:12:29Z",
       "lastVersionChangeAt": null,
       "lastStaleNotifyAt": null,
       "history": []
