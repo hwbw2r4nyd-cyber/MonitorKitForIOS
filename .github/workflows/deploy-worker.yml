@@ -1,0 +1,26 @@
+# 有改动时自动部署 Cloudflare Worker
+# 需要在 GitHub Secrets 中设置：
+#   CLOUDFLARE_API_TOKEN — Cloudflare API Token（权限：Workers Scripts: Edit）
+
+name: Deploy Worker
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "worker/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Worker to Cloudflare
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy with Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: worker
