@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "meta": {
-    "dataUpdatedAt": "2026-05-04T08:12:29Z",
+    "dataUpdatedAt": "2026-05-04T08:13:26Z",
     "lastScheduledRunAt": null
   },
   "apps": [
@@ -18,6 +18,22 @@
       "versionChangeCount": 0,
       "lastCheckedAt": "2026-05-04T08:12:29Z",
       "lastVersionChangeAt": null,
+      "lastStaleNotifyAt": null,
+      "history": []
+    },
+    {
+      "bundleId": "com.zhiliaoapp.musically",
+      "monitoring": true,
+      "listingStatus": "listed",
+      "trackName": "TikTok - Videos, Shop & LIVE",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/09/ec/1d/09ec1d07-ecca-8295-1041-901e3b23d601/TikTok_AppIcon26-0-0-1x_U007epad-0-1-0-85-220.png/512x512bb.jpg",
+      "storeVersion": "44.9.0",
+      "version": "44.9.0",
+      "currentVersionReleaseDate": "2026-04-27T09:32:15Z",
+      "lastKnownVersion": "44.9.0",
+      "versionChangeCount": 0,
+      "lastCheckedAt": "2026-05-04T08:13:26Z",
+      "lastVersionChangeAt": "2026-05-04T08:13:26Z",
       "lastStaleNotifyAt": null,
       "history": []
     }
