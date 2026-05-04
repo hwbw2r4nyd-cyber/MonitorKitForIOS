@@ -400,6 +400,26 @@
     }
   }
 
+  async function refreshAll() {
+    const base = apiBase();
+    if (!base) {
+      toast(tr("loadFailed"), true);
+      return;
+    }
+    try {
+      const r = await fetch(`${base}/refresh`, { cache: "no-store" });
+      const data = await r.json();
+      if (data.ok) {
+        toast(tr("saved"));
+        await reloadAll();
+      } else {
+        toast(data.error || tr("loadFailed"), true);
+      }
+    } catch (e) {
+      toast(e.message || String(e), true);
+    }
+  }
+
   async function openSettings() {
     try {
       config = await loadConfig();
@@ -459,7 +479,7 @@
   async function init() {
     bindNav();
     bindTabs();
-    el("btn-refresh").addEventListener("click", () => reloadAll());
+    el("btn-refresh").addEventListener("click", () => refreshAll());
 
     el("btn-add").addEventListener("click", async () => {
       const raw = el("input-bundle").value.trim();

@@ -82,6 +82,28 @@ function json(data, status = 200, extra = {}) {
   });
 }
 
+async function itunesLookup(bundleId) {
+  const url = `https://itunes.apple.com/lookup?bundleId=${encodeURIComponent(bundleId)}`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": "MonitorKitForIOS/1.0" },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data;
+}
+
+function pickArtwork(track) {
+  for (const key of ["artworkUrl512", "artworkUrl100", "artworkUrl60"]) {
+    if (track[key]) return track[key];
+  }
+  return null;
+}
+
+function formatISO() {
+  return new Date().toISOString().replace(/\.\d+Z$/, "Z");
+}
+
 function newAppShell(bundleId) {
   return {
     bundleId,
@@ -172,6 +194,59 @@ export default {
       }
       // ---- 诊断端点结束 ----
 
+      // 刷新端点：逐个查询 iTunes 更新所有应用信息
+      if (path === "/refresh" && req.method === "GET") {
+        const cur = await getRepoFile(env, STATE_PATH);
+        if (cur.missing) return json({ error: "state.json not found" }, 404, c);
+        const state = cur.json;
+        const apps = state.apps || [];
+        const results = [];
+        for (let i = 0; i < apps.length; i++) {
+          const app = apps[i];
+          const bundleId = app.bundleId;
+          if (!bundleId) continue;
+          try {
+            const raw = await itunesLookup(bundleId);
+            if (raw) {
+              const items = raw.results || [];
+              if (items.length > 0) {
+                const track = items[0];
+                app.listingStatus = "listed";
+                if (track.trackName) app.trackName = track.trackName;
+                const art = pickArtwork(track);
+                if (art) app.artworkUrl100 = art;
+                const storeVer = String(track.version || "").trim();
+                if (storeVer) {
+                  app.storeVersion = storeVer;
+                  app.version = storeVer;
+                }
+                if (track.currentVersionReleaseDate) {
+                  app.currentVersionReleaseDate = track.currentVersionReleaseDate;
+                }
+                app.lastCheckedAt = formatISO();
+                results.push({ bundleId, status: "listed" });
+              } else {
+                app.listingStatus = "not_listed";
+                app.lastCheckedAt = formatISO();
+                results.push({ bundleId, status: "not_listed" });
+              }
+            } else {
+              results.push({ bundleId, status: "lookup_failed" });
+            }
+          } catch {
+            results.push({ bundleId, status: "error" });
+          }
+          // 逐个查询，间隔 200ms 避免被 iTunes API 限流
+          if (i < apps.length - 1) {
+            await new Promise(r => setTimeout(r, 200));
+          }
+        }
+        state.meta = state.meta || {};
+        state.meta.dataUpdatedAt = formatISO();
+        await putRepoFile(env, STATE_PATH, state, "chore: refresh all apps via Worker", cur.sha);
+        return json({ ok: true, updated: results.length, meta: state.meta }, 200, c);
+      }
+
       if (path === "/state" && req.method === "GET") {
         const r = await getRepoFile(env, STATE_PATH);
         if (r.missing) return json({ error: "state.json not found" }, 404, c);
@@ -233,7 +308,38 @@ export default {
           if (state.apps.some((a) => a.bundleId === bundleId)) {
             return json({ error: "bundleId already exists" }, 409, c);
           }
-          state.apps.push(newAppShell(bundleId));
+          const app = newAppShell(bundleId);
+          // 立即查询 iTunes API 获取真实信息（不区分国家地区）
+          try {
+            const raw = await itunesLookup(bundleId);
+            if (raw) {
+              const results = raw.results || [];
+              if (results.length > 0) {
+                const track = results[0];
+                app.listingStatus = "listed";
+                if (track.trackName) app.trackName = track.trackName;
+                const art = pickArtwork(track);
+                if (art) app.artworkUrl100 = art;
+                const storeVer = String(track.version || "").trim();
+                if (storeVer) {
+                  app.storeVersion = storeVer;
+                  app.version = storeVer;
+                  app.lastKnownVersion = storeVer;
+                }
+                if (track.currentVersionReleaseDate) {
+                  app.currentVersionReleaseDate = track.currentVersionReleaseDate;
+                }
+                app.versionChangeCount = 0;
+                app.lastVersionChangeAt = formatISO();
+                app.lastCheckedAt = formatISO();
+              }
+            }
+          } catch {
+            // iTunes 查询失败则使用默认值，不影响添加
+          }
+          state.apps.push(app);
+          state.meta = state.meta || {};
+          state.meta.dataUpdatedAt = formatISO();
           await putRepoFile(env, STATE_PATH, state, `chore: add app ${bundleId}`, cur.sha);
           return json({ ok: true }, 200, c);
         }
