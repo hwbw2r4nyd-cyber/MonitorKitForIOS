@@ -282,12 +282,6 @@
 
       const chips = document.createElement("div");
       chips.className = "row-chips";
-      const st = document.createElement("span");
-      st.className =
-        "chip " + (app.listingStatus === "listed" ? "status-listed" : "status-not");
-      st.textContent =
-        app.listingStatus === "listed" ? tr("listed") : tr("notListed");
-
       const v = document.createElement("span");
       v.className = "chip";
       v.textContent = `${tr("version")}: ${app.version || app.storeVersion || tr("none")}`;
