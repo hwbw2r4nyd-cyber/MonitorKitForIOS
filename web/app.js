@@ -129,7 +129,12 @@
     n.className = "toast" + (isErr ? " err" : "");
     n.textContent = msg;
     document.body.appendChild(n);
-    setTimeout(() => n.remove(), 3200);
+    setTimeout(() => {
+      n.style.opacity = "0";
+      n.style.transform = "translateX(-50%) translateY(12px)";
+      n.style.transition = "all 0.25s ease";
+      setTimeout(() => n.remove(), 250);
+    }, 3000);
   }
 
   function apiBase() {
@@ -259,7 +264,16 @@
     const meta = state && state.meta;
     el("meta-updated").textContent = `${tr("dataUpdated")}: ${formatDisplayDate(meta && meta.dataUpdatedAt)}`;
 
-    filteredApps().forEach((app) => {
+    const apps = filteredApps();
+    if (!apps.length) {
+      const empty = document.createElement("div");
+      empty.style.cssText = "text-align:center;padding:3rem 1rem;color:var(--muted);font-size:0.9rem";
+      empty.textContent = locale === "zh" ? "暂无应用" : "No apps";
+      root.appendChild(empty);
+      return;
+    }
+
+    apps.forEach((app) => {
       const card = document.createElement("div");
       card.className = "card";
 
@@ -282,6 +296,11 @@
 
       const chips = document.createElement("div");
       chips.className = "row-chips";
+
+      const statusChip = document.createElement("span");
+      statusChip.className = "chip " + (app.listingStatus === "listed" ? "status-listed" : "status-not");
+      statusChip.textContent = app.listingStatus === "listed" ? tr("listed") : tr("notListed");
+
       const v = document.createElement("span");
       v.className = "chip";
       v.textContent = `${tr("version")}: ${app.version || app.storeVersion || tr("none")}`;
@@ -296,33 +315,12 @@
       cc.className = "chip";
       cc.textContent = `${tr("changeCount")}: ${app.versionChangeCount ?? 0}`;
 
-      chips.append(v, vdEl, cc);
+      chips.append(statusChip, v, vdEl, cc);
 
       body.append(title, bundle, chips);
 
       const actions = document.createElement("div");
       actions.className = "card-actions";
-
-      const histBtn = document.createElement("button");
-      histBtn.className = "btn";
-      histBtn.type = "button";
-      histBtn.textContent = tr("versionHistory");
-      histBtn.addEventListener("click", () => openHistory(app));
-
-      const delBtn = document.createElement("button");
-      delBtn.className = "btn";
-      delBtn.type = "button";
-      delBtn.textContent = tr("delete");
-      delBtn.addEventListener("click", async () => {
-        if (!confirm(`${tr("confirmDelete")}\n${app.bundleId}`)) return;
-        try {
-          await apiPost({ action: "deleteApp", bundleId: app.bundleId });
-          await reloadAll();
-          toast(tr("saved"));
-        } catch (e) {
-          toast(e.message || String(e), true);
-        }
-      });
 
       const sw = document.createElement("label");
       sw.className = "switch";
@@ -347,7 +345,28 @@
       swLabel.textContent = tr("monitoring");
       sw.append(cb, swLabel);
 
-      actions.append(histBtn, delBtn, sw);
+      const histBtn = document.createElement("button");
+      histBtn.className = "btn";
+      histBtn.type = "button";
+      histBtn.textContent = tr("versionHistory");
+      histBtn.addEventListener("click", () => openHistory(app));
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "btn danger";
+      delBtn.type = "button";
+      delBtn.textContent = tr("delete");
+      delBtn.addEventListener("click", async () => {
+        if (!confirm(`${tr("confirmDelete")}\n${app.bundleId}`)) return;
+        try {
+          await apiPost({ action: "deleteApp", bundleId: app.bundleId });
+          await reloadAll();
+          toast(tr("saved"));
+        } catch (e) {
+          toast(e.message || String(e), true);
+        }
+      });
+
+      actions.append(sw, histBtn, delBtn);
 
       card.append(img, body, actions);
       root.appendChild(card);
@@ -391,6 +410,7 @@
     const closeBtn = document.createElement("button");
     closeBtn.className = "btn primary";
     closeBtn.style.marginTop = "0.75rem";
+    closeBtn.style.width = "100%";
     closeBtn.textContent = tr("close");
     closeBtn.addEventListener("click", () => backdrop.remove());
 
