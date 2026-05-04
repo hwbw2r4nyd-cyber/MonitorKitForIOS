@@ -297,10 +297,6 @@
       const chips = document.createElement("div");
       chips.className = "row-chips";
 
-      const statusChip = document.createElement("span");
-      statusChip.className = "chip " + (app.listingStatus === "listed" ? "status-listed" : "status-not");
-      statusChip.textContent = app.listingStatus === "listed" ? tr("listed") : tr("notListed");
-
       const v = document.createElement("span");
       v.className = "chip";
       v.textContent = `${tr("version")}: ${app.version || app.storeVersion || tr("none")}`;
@@ -315,7 +311,7 @@
       cc.className = "chip";
       cc.textContent = `${tr("changeCount")}: ${app.versionChangeCount ?? 0}`;
 
-      chips.append(statusChip, v, vdEl, cc);
+      chips.append(v, vdEl, cc);
 
       body.append(title, bundle, chips);
 
