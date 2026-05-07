@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "meta": {
-    "dataUpdatedAt": "2026-05-06T12:34:41Z",
-    "lastScheduledRunAt": "2026-05-05T06:30:11Z"
+    "dataUpdatedAt": "2026-05-07T09:18:23Z",
+    "lastScheduledRunAt": "2026-05-07T09:18:23Z"
   },
   "apps": [
     {
@@ -10,16 +10,21 @@
       "monitoring": true,
       "listingStatus": "listed",
       "trackName": "AI Mellow",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/cf/01/3c/cf013cd8-fc3a-549b-465d-0ac743dfb0a9/AppIcon-1x_U007ephone-0-11-0-85-220-0.png/512x512bb.jpg",
-      "storeVersion": "1.0.0",
-      "version": "1.0.0",
-      "currentVersionReleaseDate": "2026-04-30T13:04:10Z",
-      "lastKnownVersion": "1.0.0",
-      "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-06T12:34:41Z",
-      "lastVersionChangeAt": "2026-05-05T06:30:11Z",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/b5/5e/e9/b55ee9b2-da5e-8064-8eef-738d2f6f2813/AppIcon-1x_U007ephone-0-11-0-85-220-0.png/512x512bb.jpg",
+      "storeVersion": "1.0.1",
+      "version": "1.0.1",
+      "currentVersionReleaseDate": "2026-05-06T18:23:42Z",
+      "lastKnownVersion": "1.0.1",
+      "versionChangeCount": 1,
+      "lastCheckedAt": "2026-05-07T09:18:23Z",
+      "lastVersionChangeAt": "2026-05-07T09:18:23Z",
       "lastStaleNotifyAt": null,
-      "history": []
+      "history": [
+        {
+          "version": "1.0.1",
+          "recordedAt": "2026-05-07T09:18:23Z"
+        }
+      ]
     },
     {
       "bundleId": "com.drwc.dreamy",
@@ -32,7 +37,7 @@
       "currentVersionReleaseDate": null,
       "lastKnownVersion": null,
       "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-06T12:34:41Z",
+      "lastCheckedAt": "2026-05-07T09:18:23Z",
       "lastVersionChangeAt": null,
       "lastStaleNotifyAt": null,
       "history": []
