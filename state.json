@@ -44,7 +44,7 @@
     },
     {
       "bundleId": "com.zers.Nookai",
-      "monitoring": false,
+      "monitoring": true,
       "listingStatus": "not_listed",
       "trackName": null,
       "artworkUrl100": null,
