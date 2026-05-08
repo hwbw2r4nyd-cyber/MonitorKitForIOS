@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "meta": {
-    "dataUpdatedAt": "2026-05-08T00:33:23Z",
+    "dataUpdatedAt": "2026-05-08T00:34:07Z",
     "lastScheduledRunAt": "2026-05-07T09:18:23Z"
   },
   "apps": [
@@ -38,6 +38,22 @@
       "lastKnownVersion": null,
       "versionChangeCount": 0,
       "lastCheckedAt": "2026-05-08T00:33:23Z",
+      "lastVersionChangeAt": null,
+      "lastStaleNotifyAt": null,
+      "history": []
+    },
+    {
+      "bundleId": "com.zers.Nookai",
+      "monitoring": true,
+      "listingStatus": "not_listed",
+      "trackName": null,
+      "artworkUrl100": null,
+      "storeVersion": null,
+      "version": null,
+      "currentVersionReleaseDate": null,
+      "lastKnownVersion": null,
+      "versionChangeCount": 0,
+      "lastCheckedAt": null,
       "lastVersionChangeAt": null,
       "lastStaleNotifyAt": null,
       "history": []
