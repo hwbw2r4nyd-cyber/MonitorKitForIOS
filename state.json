@@ -7,7 +7,7 @@
   "apps": [
     {
       "bundleId": "com.aime.Mellow",
-      "monitoring": true,
+      "monitoring": false,
       "listingStatus": "listed",
       "trackName": "AI Mellow",
       "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/b5/5e/e9/b55ee9b2-da5e-8064-8eef-738d2f6f2813/AppIcon-1x_U007ephone-0-11-0-85-220-0.png/512x512bb.jpg",
