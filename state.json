@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "meta": {
-    "dataUpdatedAt": "2026-05-11T10:48:16Z",
-    "lastScheduledRunAt": "2026-05-11T10:48:16Z"
+    "dataUpdatedAt": "2026-05-12T08:13:01Z",
+    "lastScheduledRunAt": "2026-05-12T08:13:01Z"
   },
   "apps": [
     {
@@ -16,7 +16,7 @@
       "currentVersionReleaseDate": null,
       "lastKnownVersion": null,
       "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-11T10:48:16Z",
+      "lastCheckedAt": "2026-05-12T08:13:01Z",
       "lastVersionChangeAt": null,
       "lastStaleNotifyAt": null,
       "history": []
@@ -26,16 +26,21 @@
       "monitoring": true,
       "listingStatus": "listed",
       "trackName": "AI Nook",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e3/34/fc/e334fc81-49af-c187-b228-3d12524366fc/AppIcon-1x_U007ephone-0-11-0-85-220-0.png/512x512bb.jpg",
-      "storeVersion": "1.0.0",
-      "version": "1.0.0",
-      "currentVersionReleaseDate": "2026-05-10T13:20:34Z",
-      "lastKnownVersion": "1.0.0",
-      "versionChangeCount": 0,
-      "lastCheckedAt": "2026-05-11T10:48:16Z",
-      "lastVersionChangeAt": "2026-05-11T10:48:16Z",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/ea/d6/a8/ead6a815-aee7-f871-ee00-e44ec58368a9/AppIcon-1x_U007ephone-0-11-0-85-220-0.png/512x512bb.jpg",
+      "storeVersion": "1.0.1",
+      "version": "1.0.1",
+      "currentVersionReleaseDate": "2026-05-11T21:35:41Z",
+      "lastKnownVersion": "1.0.1",
+      "versionChangeCount": 1,
+      "lastCheckedAt": "2026-05-12T08:13:01Z",
+      "lastVersionChangeAt": "2026-05-12T08:13:01Z",
       "lastStaleNotifyAt": null,
-      "history": []
+      "history": [
+        {
+          "version": "1.0.1",
+          "recordedAt": "2026-05-12T08:13:01Z"
+        }
+      ]
     }
   ]
 }
